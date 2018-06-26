@@ -1,0 +1,6 @@
+---
+- name: Run roles for PI0W
+  include_role:
+    name: "{{ item }}"
+  with_items:
+    - ""

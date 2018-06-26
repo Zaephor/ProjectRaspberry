@@ -1,0 +1,23 @@
+# Serf Agent (systemd service unit)
+[Unit]
+Description=Serf Agent
+After=multi-user.target
+
+[Service]
+Type=simple
+# Ensure the configuration directory exists.
+ExecStartPre=/usr/bin/install -d -g root -o root /etc/serf/
+ExecStartPre=/bin/bash -c "/bin/sleep 1s; /bin/ping -c 1 $(ip route|awk '/default/ { print $3 }')"
+ExecStartPre=/bin/bash -c "/bin/systemctl set-environment DISCOVER=$(/usr/sbin/arp -n $(ip route|awk '/default/ { print $3 }') | awk '!/Address/{print $3}' | tr -d ':')"
+ExecStart=/usr/bin/serf agent -config-dir=/etc/serf/ -discover=${DISCOVER}
+ExecStartPost=-/bin/bash -c "/bin/sleep 1s; /usr/bin/serf tags -set boot=$(/bin/date +%%s)"
+# Use SIGINT instead of SIGTERM so serf can depart the cluster.
+KillSignal=SIGINT
+# Restart on success, failure, and any emitted signals like HUP.
+Restart=always
+# Wait ten seconds before respawn attempts.
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+Alias=serf.service

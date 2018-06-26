@@ -1,0 +1,33 @@
+---
+- name: Ensure pull script is in CRON
+  hosts: localhost
+  become: yes
+  roles:
+    - self-cron
+
+- name: Some core requirements
+  hosts: localhost
+  become: yes
+  roles:
+    - common
+    - serf
+
+- name: Process pi-specifics
+  hosts: localhost
+  become: yes
+  tasks:
+    - shell: "grep Revision /proc/cpuinfo | cut -d ' ' -f 2 | sed 's/^1000//'"
+      register: cpurev
+      changed_when: False
+    - stat:
+        path: "./.{{ cpurev.stdout }}.pre.yml"
+      when: cpurev is defined and cpurev.stdout != ""
+      register: cpurev
+    - include_tasks: "{{ cpurev.stat.path }}"
+      when: cpurev.stat.exists
+
+- name: The rest of the requirements
+  hosts: localhost
+  become: yes
+  roles:
+    - nodejs

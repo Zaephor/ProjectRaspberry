@@ -1,0 +1,6 @@
+---
+projectraspberry_playbook_repo: "https://github.com/Zaephor/ProjectRaspberry.git"
+projectraspberry_playbook_user: "root"
+projectraspberry_playbook_dir: "/ProjectRaspberry"
+projectraspberry_playbook_schedule: "{{29|random(seed=ansible_nodename)}},{{59|random(start=30,seed=ansible_nodename)}} * * * *"
+projectraspberry_playbook_logfile: "/var/log/ProjectRaspberry_playbook.log"

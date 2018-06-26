@@ -1,0 +1,3 @@
+---
+serf_packages:
+  - net-tools

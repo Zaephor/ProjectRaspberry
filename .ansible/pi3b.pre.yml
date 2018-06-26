@@ -1,0 +1,6 @@
+---
+- name: Run roles for PI3B
+  include_role:
+    name: "{{ item }}"
+  with_items:
+    - redis

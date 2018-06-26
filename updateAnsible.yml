@@ -1,0 +1,32 @@
+---
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: Add ansible apt-key
+      environment:
+        PATH: /bin:/sbin:/usr/bin:/usr/sbin
+      apt_key:
+        keyserver: keyserver.ubuntu.com
+        id: 6125E2A8C77F2818FB7BD15B93C4A3FD7BB9C367
+      when: "ansible_version.full is version_compare('2.5', '<=')"
+    - name: Add ansible repo
+      environment:
+        PATH: /bin:/sbin:/usr/bin:/usr/sbin
+      apt_repository:
+        repo: deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main
+        state: present
+        filename: ansible
+        update_cache: yes
+      when: "ansible_version.full is version_compare('2.4', '<=')"
+    - name: Update the reboot cron
+      lineinfile:
+        dest: /etc/cron.d/ansible-pull
+        regexp: '^@reboot root ansible-pull.*ProjectRaspberry'
+        line: '@reboot root ansible-pull --accept-host-key --checkout=master --clean --directory=/ProjectRaspberry --force --url=https://github.com/Zaephor/ProjectRaspberry.git >>/var/log/ProjectRaspberry_playbook.log 2>&1'
+    - name: Update ansible
+      environment:
+        PATH: /bin:/sbin:/usr/bin:/usr/sbin
+      apt:
+        pkg: "ansible=2.5*"
+        state: present
+      when: "ansible_version.full is version_compare('2.4', '<=')"

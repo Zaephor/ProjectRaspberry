@@ -1,0 +1,55 @@
+---
+- name: Check for serf
+  stat:
+    path: /usr/bin/serf
+  register: serf_binary
+
+- name: Install deps
+  become: yes
+  environment:
+    PATH: /bin:/sbin:/usr/bin:/usr/sbin
+  apt:
+    name: "{{ item }}"
+    state: present
+    cache_valid_time: 86400
+  with_items: "{{ serf_packages }}"
+  when: not serf_binary.stat.exists
+
+- name: Install serf
+  unarchive:
+    src: https://releases.hashicorp.com/serf/0.8.1/serf_0.8.1_linux_arm.zip
+    dest: /usr/bin
+    remote_src: True
+    mode: 0755
+  when: not serf_binary.stat.exists
+
+- name: Create conf directory
+  file:
+    path: /etc/serf
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+  when: not serf_binary.stat.exists
+
+- name: Install serf service files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    force: "{{ item.force }}"
+  with_items:
+#    - { src: 'etc-init-serf.conf.j2', dest: '/etc/init/serf.conf', mode: '0644', owner: 'root', group: 'root', force: 'yes'}
+#    - { src: 'etc-init.d-serf.j2', dest: '/etc/init.d/serf', mode: '0644', owner: 'root', group: 'root', force: 'yes'}
+    - { src: 'lib-systemd-system-serf.service.j2', dest: '/lib/systemd/system/serf.service', mode: '0644', owner: 'root', group: 'root', force: 'yes'}
+    - { src: 'etc-serf-serf.json.j2', dest: '/etc/serf/serf.json', mode: '0644', owner: 'root', group: 'root', force: 'yes'}
+
+- name: Install service
+  systemd:
+    daemon_reload: yes
+    name: serf
+    enabled: yes
+    state: started
+    masked: no

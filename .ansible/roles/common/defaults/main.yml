@@ -1,0 +1,9 @@
+---
+common_packages:
+  - "apt-transport-https"
+  - "ca-certificates=2016*"
+  - "htop"
+  - "iftop"
+  - "jq"
+  - "screen"
+  - "unzip"
