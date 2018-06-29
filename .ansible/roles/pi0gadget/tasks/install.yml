@@ -1,0 +1,33 @@
+---
+- name: Need to enable the dwc2 driver in boot config
+  lineinfile:
+    path: /boot/config.txt
+    regexp: '^dtoverlay='
+    line: 'dtoverlay=dwc2'
+  register: updatedBootConfig
+
+- name: Need to add dwc2 and config to OS modules
+  lineinfile:
+    path: /etc/modules
+    regexp: '{{ item.reg }}'
+    line: '{{ item.line }}'
+  register: updatedModules
+  loop:
+    - {reg: '^dwc2$', line: 'dwc2'}
+#    - {reg: '^g_ether$', line:'g_ether'}
+
+- debug:
+    msg: "{{ updatedModules }}"
+
+- name: Update the reboot cron to force re-exec on reboot
+  lineinfile:
+    dest: /etc/cron.d/ansible-pull
+    regexp: '^@reboot root /usr/bin/flock -n /tmp/ProjectRaspberry.lock /usr/bin/ansible-pull.*ProjectRaspberry'
+    line: '@reboot root /usr/bin/flock -n /tmp/ProjectRaspberry.lock /usr/bin/ansible-pull --accept-host-key --checkout=master --clean --directory=/ProjectRaspberry --force --url=https://github.com/Zaephor/ProjectRaspberry.git >>/var/log/ProjectRaspberry_playbook.log 2>&1'
+  when: updatedBootConfig.changed or updatedModules.changed
+
+- name: Rebooting because of changes to OS environment
+  shell: "/sbin/reboot -f"
+  async: 1
+  poll: 0
+  when: updatedBootConfig.changed or updatedModules.changed
