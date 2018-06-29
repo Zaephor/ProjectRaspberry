@@ -1,4 +1,5 @@
 ---
+# https://gist.github.com/gbaman/50b6cca61dd1c3f88f41
 - name: Need to enable the dwc2 driver in boot config
   lineinfile:
     path: /boot/config.txt
