@@ -13,7 +13,7 @@
     line: '{{ item.line }}'
   register: updatedModules
   with_items:
-    - {reg: '^dwc2$', line:'dwc2'}
+    - {reg: '^dwc2$', line: 'dwc2'}
 #    - {reg: '^g_ether$', line:'g_ether'}
 
 - name: Update the reboot cron to force re-exec on reboot
