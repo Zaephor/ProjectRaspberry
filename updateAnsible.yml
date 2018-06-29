@@ -8,7 +8,7 @@
       apt_key:
         keyserver: keyserver.ubuntu.com
         id: 6125E2A8C77F2818FB7BD15B93C4A3FD7BB9C367
-      when: "ansible_version.full is version_compare('2.5', '<=')"
+      when: "ansible_version.full is version_compare('2.6', '<=')"
     - name: Add ansible repo
       environment:
         PATH: /bin:/sbin:/usr/bin:/usr/sbin
@@ -18,6 +18,12 @@
         filename: ansible
         update_cache: yes
       when: "ansible_version.full is version_compare('2.4', '<=')"
+    - name: Ensure the reboot cron exists
+      file:
+        path: /etc/cron.d/ansible-pull
+        owner: root
+        group: root
+        state: touch
     - name: Update the reboot cron
       lineinfile:
         dest: /etc/cron.d/ansible-pull
@@ -27,6 +33,6 @@
       environment:
         PATH: /bin:/sbin:/usr/bin:/usr/sbin
       apt:
-        pkg: "ansible=2.5*"
+        pkg: "ansible=2.6*"
         state: present
       when: "ansible_version.full is version_compare('2.4', '<=')"
