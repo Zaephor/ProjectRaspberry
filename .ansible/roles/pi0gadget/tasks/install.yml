@@ -14,7 +14,7 @@
   register: updatedModules
   loop:
     - {reg: '^dwc2$', line: 'dwc2'}
-#    - {reg: '^g_ether$', line:'g_ether'}
+    - {reg: '^g_multi$', line:'g_multi'}
 
 - name: Update the reboot cron to force re-exec on reboot
   lineinfile:
