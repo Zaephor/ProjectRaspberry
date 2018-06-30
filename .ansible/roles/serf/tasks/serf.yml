@@ -45,11 +45,12 @@
 #    - { src: 'etc-init.d-serf.j2', dest: '/etc/init.d/serf', mode: '0644', owner: 'root', group: 'root', force: 'yes'}
     - { src: 'lib-systemd-system-serf.service.j2', dest: '/lib/systemd/system/serf.service', mode: '0644', owner: 'root', group: 'root', force: 'yes'}
     - { src: 'etc-serf-serf.json.j2', dest: '/etc/serf/serf.json', mode: '0644', owner: 'root', group: 'root', force: 'yes'}
+  register: serfConfigFiles
 
 - name: Install service
   systemd:
     daemon_reload: yes
     name: serf
     enabled: yes
-    state: started
+    state: "{{ 'restarted' if (serfConfigFiles.changed) else 'started' }}"
     masked: no
