@@ -36,3 +36,9 @@
         pkg: "ansible=2.6*"
         state: present
       when: "ansible_version.full is version_compare('2.4', '<=')"
+      register: ansibleUpdate
+    - name: Reboot to rerun the ansible script
+      shell: "/sbin/reboot -f"
+      async: 1
+      pool: 0
+      when: ansibleUpdate.changed
