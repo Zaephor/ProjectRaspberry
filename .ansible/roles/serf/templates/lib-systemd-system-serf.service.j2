@@ -11,6 +11,7 @@ ExecStartPre=/bin/bash -c "/bin/sleep 1s; /bin/ping -c 1 $(ip route|awk '/defaul
 ExecStartPre=/bin/bash -c "/bin/systemctl set-environment DISCOVER=$(/usr/sbin/arp -n $(ip route|awk '/default/ { print $3 }') | awk '!/Address/{print $3}' | tr -d ':')"
 ExecStart=/usr/bin/serf agent -config-dir=/etc/serf/ -discover=${DISCOVER}
 ExecStartPost=-/bin/bash -c "/bin/sleep 1s; /usr/bin/serf tags -set boot=$(/bin/date +%%s)"
+ExecStartPost=-/bin/bash -c "/bin/sleep 1s; /usr/bin/serf tags -set redis=$(systemctl is-active --quiet redis-server && echo 'active' || echo 'inactive')"
 # Use SIGINT instead of SIGTERM so serf can depart the cluster.
 KillSignal=SIGINT
 # Restart on success, failure, and any emitted signals like HUP.
